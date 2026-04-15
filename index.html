@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulonera Manzur - Herramientas y Tornillos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Modal de Login -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container" id="loginContainer">
+            <div class="login-header">
+                <i class="fas fa-lock"></i>
+                <h2 id="headerTitle">Iniciar Sesión</h2>
+            </div>
+
+            <!-- Pestañas de Cliente y Admin (solo en login) -->
+            <div class="login-tabs" id="loginTabs">
+                <button class="tab-btn active" data-tab="cliente">
+                    <i class="fas fa-user"></i> Cliente
+                </button>
+                <button class="tab-btn" data-tab="admin">
+                    <i class="fas fa-shield-alt"></i> Administrador
+                </button>
+            </div>
+
+            <!-- Formulario Cliente -->
+            <form class="login-form active" id="clienteForm" data-type="cliente">
+                <div class="form-group">
+                    <label for="clienteUsername">Nombre de Usuario (Nombre Real)</label>
+                    <input type="text" id="clienteUsername" placeholder="Ingrese su nombre completo" required>
+                </div>
+                <div class="form-group">
+                    <label for="clientePassword">Contraseña</label>
+                    <input type="password" id="clientePassword" placeholder="Ingrese su contraseña" required>
+                </div>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+                <p class="login-note">Demo: usuario: "usuario1" | contraseña: "pass123"</p>
+            </form>
+
+            <!-- Formulario Administrador -->
+            <form class="login-form" id="adminForm" data-type="admin">
+                <div class="form-group">
+                    <label for="adminUsername">Usuario</label>
+                    <input type="text" id="adminUsername" placeholder="Ingrese el usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Contraseña</label>
+                    <input type="password" id="adminPassword" placeholder="Ingrese la contraseña" required>
+                </div>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+                <p class="login-note">Demo: usuario: "admin" | contraseña: "admin123"</p>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form class="login-form" id="registerForm" data-type="registro">
+                <div class="form-group">
+                    <label for="registerNombre">Nombre</label>
+                    <input type="text" id="registerNombre" placeholder="Ingrese su nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerApellido">Apellido</label>
+                    <input type="text" id="registerApellido" placeholder="Ingrese su apellido" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Gmail</label>
+                    <input type="email" id="registerEmail" placeholder="Ingrese su correo Gmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerTelefono">Número de Teléfono</label>
+                    <input type="tel" id="registerTelefono" placeholder="Ingrese su número de teléfono" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerFecha">Fecha de Nacimiento</label>
+                    <input type="date" id="registerFecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <input type="password" id="registerPassword" placeholder="Cree una contraseña" required>
+                </div>
+                <button type="submit" class="btn-login">Crear Cuenta</button>
+            </form>
+
+            <!-- Botones de Acción -->
+            <div class="login-actions" id="loginActions">
+                <button type="button" class="btn-toggle-register">¿No tienes cuenta? <strong>Crear una</strong></button>
+            </div>
+
+            <div class="register-actions" id="registerActions" style="display: none;">
+                <button type="button" class="btn-toggle-login">¿Ya tienes cuenta? <strong>Inicia sesión</strong></button>
+            </div>
+
+            <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- Navbar Superior -->
+    <nav class="navbar-top">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <div class="logo">
+                    <i class="fas fa-wrench"></i>
+                    <span>Bulonera<br><strong>Manzur</strong></span>
+                </div>
+            </div>
+
+            <div class="navbar-center">
+                <div class="search-container">
+                    <select class="category-select">
+                        <option value="">Categoría</option>
+                        <option value="tornillos">Tornillos</option>
+                        <option value="herramientas">Herramientas</option>
+                        <option value="seguridad">Seguridad</option>
+                        <option value="construccion">Construcción</option>
+                        <option value="pinturas">Pinturas</option>
+                    </select>
+                    <input type="text" class="search-input" placeholder="Ingrese una palabra para buscar producto">
+                    <button class="search-btn">Buscar</button>
+                </div>
+            </div>
+
+            <div class="navbar-right">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span class="contact-label">SUCURSALES</span>
+                    <span class="contact-value">343-xxx xxxx</span>
+                </div>
+                <div class="divider"></div>
+                <div class="info-item">
+                    <span class="info-label">MAYORISTAS</span>
+                    <span class="info-value">Ingrese aquí</span>
+                </div>
+                <div class="divider"></div>
+                <div class="account-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Mi cuenta</span>
+                </div>
+                <div class="divider"></div>
+                <div class="logout-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </div>
+                <div class="cart-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0 / 0</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Secundario -->
+    <nav class="navbar-bottom">
+        <div class="navbar-container">
+            <ul class="menu-list">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#categorias">Categorías</a></li>
+                <li><a href="#nuestros-productos">Nuestros Productos</a></li>
+                <li><a href="#ofertas">Ofertas</a></li>
+                <li><a href="#nosotros">Contacto</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bienvenido a Bulonera Manzur</h1>
+                <p>Tu tienda de confianza para herramientas, tornillos y equipamiento industrial</p>
+            </div>
+        </section>
+
+        <!-- Categorías Destacadas -->
+        <section class="categories" id="categorias">
+            <h2 class="section-title">Categorías Destacadas</h2>
+            <div class="categories-grid">
+                <div class="category-card" style="background-image: url('materiales-fabricacion-tornillos.webp')">
+                    <div class="category-overlay">
+                        <h3>Buloneria en General</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+
+                <div class="category-card" style="background-image: url('151341178-vista-superior-del-conjunto-de-herramientas-manuales-sobre-fondo-de-madera-clasificación-de-color.webp')">
+                    <div class="category-overlay">
+                        <h3>Herramientas Manuales</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+
+                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%234a90e2%22 width=%221200%22 height=%22800%22/></svg>')">
+                    <div class="category-overlay">
+                        <h3>Industria y Construcción</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+
+                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22#d19e00%22 width=%221200%22 height=%22800%22/></svg>')">
+                    <div class="category-overlay">
+                        <h3>Pinturas</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+
+                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%23c71585%22 width=%221200%22 height=%22800%22/></svg>')">
+                    <div class="category-overlay">
+                        <h3>Seguridad e Indumentaria</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+
+                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%23ff6b35%22 width=%221200%22 height=%22800%22/></svg>')">
+                    <div class="category-overlay">
+                        <h3>Herramientas Eléctricas</h3>
+                        <button class="btn-category">Ver Productos</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nuestros Productos -->
+        <section class="our-products" id="nuestros-productos">
+            <h2 class="section-title">Nuestros Productos</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <img src="empresas/02-BLACK_DECKER.jpg" alt="Black Decker">
+                </div>
+                <div class="product-card">
+                    <img src="empresas/03-STANLEY.jpg" alt="Stanley">
+                </div>
+                <div class="product-card">
+                    <img src="empresas/04-DEWALT.jpg" alt="DeWalt">
+                </div>
+                <div class="product-card">
+                    <img src="empresas/05-PUMPKIN.jpg" alt="Pumpkin">
+                </div>
+                <div class="product-card">
+                    <img src="empresas/07-FACSA.jpg" alt="Facsa">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Bulonera Manzur. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
