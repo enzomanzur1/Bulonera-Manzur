@@ -89,6 +89,45 @@
         </div>
     </div>
 
+    <!-- Modal del Carrito -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-modal-content">
+            <div class="cart-modal-header">
+                <h2>Mi Carrito de Compras</h2>
+                <button class="modal-close-btn" id="cartCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-modal-body">
+                <div class="cart-items-list" id="cartItemsList">
+                    <!-- Los artículos del carrito se cargarán aquí -->
+                </div>
+                <div class="cart-empty" id="cartEmpty">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Tu carrito está vacío</p>
+                </div>
+            </div>
+            <div class="cart-modal-footer">
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Cantidad de artículos:</span>
+                        <span id="cartCount">0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="cartTotal">$0.00</span>
+                    </div>
+                </div>
+                <button class="btn-checkout" id="checkoutBtn">Ir al Pago</button>
+                <button class="btn-continue-shopping" id="continueShoppingBtn">Continuar Comprando</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Navbar Superior -->
     <nav class="navbar-top">
         <div class="navbar-container">
