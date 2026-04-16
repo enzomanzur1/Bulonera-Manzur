@@ -16,42 +16,18 @@
                 <h2 id="headerTitle">Iniciar Sesión</h2>
             </div>
 
-            <!-- Pestañas de Cliente y Admin (solo en login) -->
-            <div class="login-tabs" id="loginTabs">
-                <button class="tab-btn active" data-tab="cliente">
-                    <i class="fas fa-user"></i> Cliente
-                </button>
-                <button class="tab-btn" data-tab="admin">
-                    <i class="fas fa-shield-alt"></i> Administrador
-                </button>
-            </div>
-
             <!-- Formulario Cliente -->
             <form class="login-form active" id="clienteForm" data-type="cliente">
                 <div class="form-group">
-                    <label for="clienteUsername">Nombre de Usuario (Nombre Real)</label>
-                    <input type="text" id="clienteUsername" placeholder="Ingrese su nombre completo" required>
+                    <label for="clienteUsername">Nombre de Usuario</label>
+                    <input type="text" id="clienteUsername" placeholder="Ingrese su usuario" required>
                 </div>
                 <div class="form-group">
                     <label for="clientePassword">Contraseña</label>
                     <input type="password" id="clientePassword" placeholder="Ingrese su contraseña" required>
                 </div>
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
-                <p class="login-note">Demo: usuario: "usuario1" | contraseña: "pass123"</p>
-            </form>
-
-            <!-- Formulario Administrador -->
-            <form class="login-form" id="adminForm" data-type="admin">
-                <div class="form-group">
-                    <label for="adminUsername">Usuario</label>
-                    <input type="text" id="adminUsername" placeholder="Ingrese el usuario" required>
-                </div>
-                <div class="form-group">
-                    <label for="adminPassword">Contraseña</label>
-                    <input type="password" id="adminPassword" placeholder="Ingrese la contraseña" required>
-                </div>
-                <button type="submit" class="btn-login">Iniciar Sesión</button>
-                <p class="login-note">Demo: usuario: "admin" | contraseña: "admin123"</p>
+                <p class="login-note">Demo: usuario: "lokura" | contraseña: "123456"</p>
             </form>
 
             <!-- Formulario de Registro -->
@@ -93,6 +69,23 @@
             </div>
 
             <div class="login-error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Productos -->
+    <div class="products-modal" id="productsModal">
+        <div class="products-modal-content">
+            <div class="products-modal-header">
+                <h2 id="modalProductTitle">Productos</h2>
+                <button class="modal-close-btn" id="modalCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="products-modal-body">
+                <div class="products-list" id="productsList">
+                    <!-- Los productos se cargarán aquí dinámicamente -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -190,28 +183,28 @@
                     </div>
                 </div>
 
-                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%234a90e2%22 width=%221200%22 height=%22800%22/></svg>')">
+                <div class="category-card" style="background-image: url('1c.webp')">
                     <div class="category-overlay">
                         <h3>Industria y Construcción</h3>
                         <button class="btn-category">Ver Productos</button>
                     </div>
                 </div>
 
-                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22#d19e00%22 width=%221200%22 height=%22800%22/></svg>')">
+                <div class="category-card" style="background-image: url('pinturas.webp')">
                     <div class="category-overlay">
                         <h3>Pinturas</h3>
                         <button class="btn-category">Ver Productos</button>
                     </div>
                 </div>
 
-                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%23c71585%22 width=%221200%22 height=%22800%22/></svg>')">
+                <div class="category-card" style="background-image: url('casco-gafas-protectoras-y-orejeras-amarillas-en-entornos-industriales.webp')">
                     <div class="category-overlay">
                         <h3>Seguridad e Indumentaria</h3>
                         <button class="btn-category">Ver Productos</button>
                     </div>
                 </div>
 
-                <div class="category-card" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1200 800%22><rect fill=%22%23ff6b35%22 width=%221200%22 height=%22800%22/></svg>')">
+                <div class="category-card" style="background-image: url('48636180-herramientas-eléctricas-manuales-destornillador-taladro-sierra-rompecabezas-ensambladora-de.webp')">
                     <div class="category-overlay">
                         <h3>Herramientas Eléctricas</h3>
                         <button class="btn-category">Ver Productos</button>
