@@ -1,7 +1,7 @@
 /* Variables de Color */
 :root {
-    --color-primary: #2d5016;
-    --color-primary-dark: #1f3f0a;
+    --color-primary: #5dd9de;
+    --color-primary-dark: #3dbf86;
     --color-accent: #f5a623;
     --color-accent-light: #ffb84d;
     --color-text: #333;
@@ -338,7 +338,7 @@ body.login-active .footer {
 
 /* Navbar Superior */
 .navbar-top {
-    background-color: var(--color-primary);
+    background: linear-gradient(90deg, #5dd9de 0%, #3dbf86 50%, #2dd4bf 100%);
     padding: 15px 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: sticky;
@@ -537,7 +537,7 @@ body.login-active .footer {
 
 /* Navbar Inferior (Menu secundario) */
 .navbar-bottom {
-    background-color: var(--color-primary-dark);
+    background: linear-gradient(90deg, #5dd9de 0%, #3dbf86 50%, #2dd4bf 100%);
     padding: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -1048,7 +1048,7 @@ body.login-active .footer {
     align-items: center;
     padding: 25px;
     border-bottom: 2px solid var(--color-border);
-    background-color: var(--color-primary);
+    background: linear-gradient(90deg, #1022c0 0%, #0bcfa5 50%, #15ce0e 100%);
     color: var(--color-white);
     border-radius: 12px 12px 0 0;
     position: sticky;
@@ -1058,19 +1058,30 @@ body.login-active .footer {
 .products-modal-header h2 {
     font-size: 24px;
     margin: 0;
+    color: var(--color-violet);
 }
 
 .modal-close-btn {
     background-color: transparent;
     border: none;
     color: var(--color-white);
-    font-size: 28px;
+    font-size: 40px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
 }
 
 .modal-close-btn:hover {
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.2);
+    color: #e0f7ff;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
 }
 
 .products-modal-body {
@@ -1085,18 +1096,20 @@ body.login-active .footer {
 
 .product-item {
     background-color: var(--color-bg);
-    border: 2px solid var(--color-border);
-    border-radius: 8px;
+    border: 3px solid var(--color-border);
+    border-radius: 12px;
     padding: 20px;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-12px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
     border-color: var(--color-accent);
+    border-width: 4px;
 }
 
 .product-item-name {

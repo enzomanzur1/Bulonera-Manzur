@@ -25,7 +25,64 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initializeLoginSystem();
     initializeRegisterSystem();
+    initializeAdminPanel();
 });
+
+function initializeAdminPanel() {
+    // Botón para abrir panel de admin
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', showAdminPanel);
+    }
+    
+    // Botón para cerrar panel de admin
+    const adminCloseBtn = document.getElementById('adminCloseBtn');
+    if (adminCloseBtn) {
+        adminCloseBtn.addEventListener('click', closeAdminPanel);
+    }
+    
+    // Botón para filtrar
+    const filterBtn = document.getElementById('filterBtn');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', applyFilters);
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    const adminModal = document.getElementById('adminModal');
+    if (adminModal) {
+        adminModal.addEventListener('click', function(e) {
+            if (e.target === adminModal) {
+                closeAdminPanel();
+            }
+        });
+    }
+    
+    // Modal de edición de stock
+    const editStockCloseBtn = document.getElementById('editStockCloseBtn');
+    if (editStockCloseBtn) {
+        editStockCloseBtn.addEventListener('click', closeEditStockModal);
+    }
+    
+    const saveStockBtn = document.getElementById('saveStockBtn');
+    if (saveStockBtn) {
+        saveStockBtn.addEventListener('click', saveStockChanges);
+    }
+    
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', closeEditStockModal);
+    }
+    
+    // Cerrar modal de edición al hacer clic fuera
+    const editStockModal = document.getElementById('editStockModal');
+    if (editStockModal) {
+        editStockModal.addEventListener('click', function(e) {
+            if (e.target === editStockModal) {
+                closeEditStockModal();
+            }
+        });
+    }
+}
 
 function initializeLoginSystem() {
     // Enviar formularios de login
@@ -420,6 +477,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== SISTEMA DE PRODUCTOS ====================
 
+// Base de datos de productos por empresa
+const COMPANIES_PRODUCTS = {
+    'Black+Decker': [
+        { id: 1, name: 'Taladro inalámbrico Black+Decker 18V', price: 145.00, description: 'Taladro compacto con batería incluida' },
+        { id: 2, name: 'Sierra circular Black+Decker 150mm', price: 95.00, description: 'Potencia 1100W, cortes precisos' },
+        { id: 3, name: 'Juego de brocas Black+Decker 100 piezas', price: 35.00, description: 'Brocas para metal, madera y concreto' },
+        { id: 4, name: 'Destornillador de impacto Black+Decker', price: 65.00, description: 'Ideal para tornillos difíciles' },
+        { id: 5, name: 'Amoladora angular Black+Decker 115mm', price: 85.00, description: 'Potencia 750W' },
+        { id: 6, name: 'Soldadora Black+Decker 130A', price: 250.00, description: 'Para soldadura en acero' },
+        { id: 7, name: 'Lijadora Black+Decker 230W', price: 55.00, description: 'Acción orbital, vibración baja' },
+        { id: 8, name: 'Compresor de aire Black+Decker 50L', price: 320.00, description: 'Presión máxima 8 bar' }
+    ],
+    'Stanley': [
+        { id: 1, name: 'Juego de herramientas Stanley 108 piezas', price: 199.99, description: 'Juego completo de herramientas manuales' },
+        { id: 2, name: 'Nivel Stanley magnético 600mm', price: 42.50, description: 'Nivel de precisión profesional' },
+        { id: 3, name: 'Caja de herramientas Stanley metal', price: 65.00, description: 'Organizador de herramientas resistente' },
+        { id: 4, name: 'Juego de llaves Stanley 24 piezas', price: 89.99, description: 'Llaves fijas de 6-32mm' },
+        { id: 5, name: 'Martillo de fibra Stanley 570g', price: 28.50, description: 'Mango de fibra resistente' },
+        { id: 6, name: 'Destornilladores Stanley 6 piezas', price: 19.99, description: 'Juego de precisión' },
+        { id: 7, name: 'Linterna led Stanley 180 lm', price: 24.99, description: 'Resistente al agua' },
+        { id: 8, name: 'Cinta métrica Stanley 10m', price: 15.99, description: 'Con bloqueo automático' }
+    ],
+    'DeWalt': [
+        { id: 1, name: 'Taladro percutor DeWalt 20V', price: 280.00, description: 'Taladro profesional con batería' },
+        { id: 2, name: 'Sierra caladora DeWalt 500W', price: 165.00, description: 'Corte en madera y metal' },
+        { id: 3, name: 'Multiherramienta DeWalt 300W', price: 155.00, description: 'Con accesorios variados' },
+        { id: 4, name: 'Rotomartillo DeWalt SDS Plus', price: 420.00, description: 'Para perforación en concreto' },
+        { id: 5, name: 'Batería DeWalt XR 20V', price: 85.00, description: 'Compatible con herramientas 20V' },
+        { id: 6, name: 'Cargador DeWalt rápido', price: 65.00, description: 'Carga completa en 30 minutos' },
+        { id: 7, name: 'Maletín DeWalt profesional', price: 95.00, description: 'Organizador de herramientas' },
+        { id: 8, name: 'Sierra circular DeWalt 190mm', price: 215.00, description: 'Potencia 1600W' }
+    ],
+    'Pumpkin': [
+        { id: 1, name: 'Bomba de agua Pumpkin 1100W', price: 125.00, description: 'Bomba sumergible para piscinas' },
+        { id: 2, name: 'Motobomba Pumpkin 3 HP', price: 350.00, description: 'Para riego agrícola' },
+        { id: 3, name: 'Bomba de presión Pumpkin 800W', price: 95.00, description: 'Para sistemas de riego' },
+        { id: 4, name: 'Aireador Pumpkin 1500W', price: 180.00, description: 'Para piscinas y estanques' },
+        { id: 5, name: 'Electrobomba Pumpkin 1 HP', price: 200.00, description: 'Monofásica de precisión' },
+        { id: 6, name: 'Bomba de achique Pumpkin 400W', price: 75.00, description: 'Para drenaje de agua' },
+        { id: 7, name: 'Filtro bomba Pumpkin 400L/h', price: 60.00, description: 'Sistema de filtración' },
+        { id: 8, name: 'Manguera para bomba 50m', price: 45.00, description: 'Manguera reforzada 1 pulgada' }
+    ],
+    'Facsa': [
+        { id: 1, name: 'Cisterna Facsa 1000L', price: 850.00, description: 'Tanque de polietileno' },
+        { id: 2, name: 'Boiler Facsa 50L', price: 450.00, description: 'Calentador de agua eléctrico' },
+        { id: 3, name: 'Accesorios para cisterna Facsa', price: 120.00, description: 'Kit completo de instalación' },
+        { id: 4, name: 'Flotador Facsa 1 pulgada', price: 25.00, description: 'Válvula de nivel de agua' },
+        { id: 5, name: 'Reducción Facsa para tubo', price: 15.00, description: 'Adaptador de 1 a 1/2 pulgada' },
+        { id: 6, name: 'Llave de paso Facsa 1 pulgada', price: 35.00, description: 'Esfera de latón' },
+        { id: 7, name: 'Tubo PVC Facsa 4 pulgadas', price: 80.00, description: 'Por metro' },
+        { id: 8, name: 'Kit de herramientas Facsa para instalación', price: 95.00, description: 'Herramientas especializadas' }
+    ]
+};
+
 // Base de datos de productos por categoría
 const PRODUCTS_DATABASE = {
     'Buloneria en General': [
@@ -484,6 +595,264 @@ const PRODUCTS_DATABASE = {
     ]
 };
 
+// ==================== SISTEMA DE CONTROL DE STOCK ====================
+
+// Base de datos de stock por empresa y producto
+let STOCK_DATABASE = localStorage.getItem('stockDatabase') ? JSON.parse(localStorage.getItem('stockDatabase')) : {
+    'Black+Decker': [
+        { name: 'Taladro inalámbrico Black+Decker 18V', actual: 25, minimo: 5 },
+        { name: 'Sierra circular Black+Decker 150mm', actual: 15, minimo: 3 },
+        { name: 'Juego de brocas Black+Decker 100 piezas', actual: 8, minimo: 5 },
+        { name: 'Destornillador de impacto Black+Decker', actual: 2, minimo: 5 },
+        { name: 'Amoladora angular Black+Decker 115mm', actual: 12, minimo: 3 },
+        { name: 'Soldadora Black+Decker 130A', actual: 5, minimo: 2 },
+        { name: 'Lijadora Black+Decker 230W', actual: 10, minimo: 3 },
+        { name: 'Compresor de aire Black+Decker 50L', actual: 3, minimo: 1 }
+    ],
+    'Stanley': [
+        { name: 'Juego de herramientas Stanley 108 piezas', actual: 20, minimo: 5 },
+        { name: 'Nivel Stanley magnético 600mm', actual: 45, minimo: 10 },
+        { name: 'Caja de herramientas Stanley metal', actual: 35, minimo: 10 },
+        { name: 'Juego de llaves Stanley 24 piezas', actual: 28, minimo: 8 },
+        { name: 'Martillo de fibra Stanley 570g', actual: 50, minimo: 15 },
+        { name: 'Destornilladores Stanley 6 piezas', actual: 60, minimo: 20 },
+        { name: 'Linterna led Stanley 180 lm', actual: 40, minimo: 15 },
+        { name: 'Cinta métrica Stanley 10m', actual: 55, minimo: 20 }
+    ],
+    'DeWalt': [
+        { name: 'Taladro percutor DeWalt 20V', actual: 18, minimo: 3 },
+        { name: 'Sierra caladora DeWalt 500W', actual: 12, minimo: 2 },
+        { name: 'Multiherramienta DeWalt 300W', actual: 16, minimo: 3 },
+        { name: 'Rotomartillo DeWalt SDS Plus', actual: 4, minimo: 1 },
+        { name: 'Batería DeWalt XR 20V', actual: 22, minimo: 8 },
+        { name: 'Cargador DeWalt rápido', actual: 25, minimo: 5 },
+        { name: 'Maletín DeWalt profesional', actual: 8, minimo: 2 },
+        { name: 'Sierra circular DeWalt 190mm', actual: 14, minimo: 3 }
+    ],
+    'Pumpkin': [
+        { name: 'Bomba de agua Pumpkin 1100W', actual: 30, minimo: 8 },
+        { name: 'Motobomba Pumpkin 3 HP', actual: 6, minimo: 2 },
+        { name: 'Bomba de presión Pumpkin 800W', actual: 18, minimo: 5 },
+        { name: 'Aireador Pumpkin 1500W', actual: 9, minimo: 3 },
+        { name: 'Electrobomba Pumpkin 1 HP', actual: 12, minimo: 3 },
+        { name: 'Bomba de achique Pumpkin 400W', actual: 24, minimo: 5 },
+        { name: 'Filtro bomba Pumpkin 400L/h', actual: 35, minimo: 10 },
+        { name: 'Manguera para bomba 50m', actual: 40, minimo: 15 }
+    ],
+    'Facsa': [
+        { name: 'Cisterna Facsa 1000L', actual: 7, minimo: 2 },
+        { name: 'Boiler Facsa 50L', actual: 11, minimo: 3 },
+        { name: 'Accesorios para cisterna Facsa', actual: 19, minimo: 5 },
+        { name: 'Flotador Facsa 1 pulgada', actual: 80, minimo: 20 },
+        { name: 'Reducción Facsa para tubo', actual: 100, minimo: 30 },
+        { name: 'Llave de paso Facsa 1 pulgada', actual: 45, minimo: 10 },
+        { name: 'Tubo PVC Facsa 4 pulgadas', actual: 25, minimo: 5 },
+        { name: 'Kit de herramientas Facsa para instalación', actual: 13, minimo: 3 }
+    ]
+};
+
+// Guardar stock en localStorage cuando se modifique
+function saveStockToLocalStorage() {
+    localStorage.setItem('stockDatabase', JSON.stringify(STOCK_DATABASE));
+}
+
+// Función para obtener estado del stock
+function getStockStatus(actual, minimo) {
+    if (actual <= 0) return 'critico';
+    if (actual <= minimo) return 'bajo';
+    return 'ok';
+}
+
+// Función para mostrar el panel de administrador
+function showAdminPanel() {
+    const modal = document.getElementById('adminModal');
+    modal.classList.add('active');
+    renderStockTable();
+    updateAlertsSummary();
+}
+
+// Función para cerrar el panel de administrador
+function closeAdminPanel() {
+    const modal = document.getElementById('adminModal');
+    modal.classList.remove('active');
+}
+
+// Función para renderizar la tabla de stock
+function renderStockTable(filterCompany = '', filterProduct = '') {
+    const tbody = document.getElementById('stockTableBody');
+    tbody.innerHTML = '';
+    
+    const companyColors = {
+        'Black+Decker': '#FFA500',
+        'Stanley': '#0066CC',
+        'DeWalt': '#FFCC00',
+        'Pumpkin': '#FF6600',
+        'Facsa': '#0099CC'
+    };
+    
+    for (const [company, products] of Object.entries(STOCK_DATABASE)) {
+        // Aplicar filtro de empresa
+        if (filterCompany && company !== filterCompany) continue;
+        
+        // Filtrar productos primero
+        const filteredProducts = filterProduct 
+            ? products.filter(p => p.name.toLowerCase().includes(filterProduct.toLowerCase()))
+            : products;
+        
+        if (filteredProducts.length === 0) continue;
+        
+        // Agregar header de empresa
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'company-header-row';
+        headerRow.style.borderLeft = `8px solid ${companyColors[company]}`;
+        headerRow.innerHTML = `
+            <td colspan="7">
+                <div class="company-header">
+                    <i class="fas fa-building"></i>
+                    <strong>${company}</strong>
+                    <span class="product-count">${filteredProducts.length} productos</span>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(headerRow);
+        
+        // Agregar filas de productos
+        filteredProducts.forEach((product, index) => {
+            const status = getStockStatus(product.actual, product.minimo);
+            const statusLabel = status === 'critico' ? 'CRÍTICO' : status === 'bajo' ? 'BAJO' : 'OK';
+            const statusIcon = status === 'critico' ? '🔴' : status === 'bajo' ? '🟡' : '🟢';
+            
+            const row = document.createElement('tr');
+            row.className = `stock-row status-${status}`;
+            row.innerHTML = `
+                <td class="company-cell" style="border-left: 4px solid ${companyColors[company]}; color: ${companyColors[company]}; font-weight: 600;">●</td>
+                <td>${product.name}</td>
+                <td class="stock-actual">${product.actual}</td>
+                <td class="stock-minimo">${product.minimo}</td>
+                <td class="stock-available">${Math.max(0, product.actual - product.minimo)}</td>
+                <td class="status-cell"><span class="status-badge ${status}">${statusIcon} ${statusLabel}</span></td>
+                <td>
+                    <button class="btn-edit-stock" onclick="openEditStockModal('${company}', ${index})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+}
+
+// Función para actualizar el resumen de alertas
+function updateAlertsSummary() {
+    let critical = 0, warning = 0, ok = 0;
+    
+    for (const company of Object.values(STOCK_DATABASE)) {
+        company.forEach(product => {
+            const status = getStockStatus(product.actual, product.minimo);
+            if (status === 'critico') critical++;
+            else if (status === 'bajo') warning++;
+            else ok++;
+        });
+    }
+    
+    document.getElementById('criticalCount').textContent = critical;
+    document.getElementById('warningCount').textContent = warning;
+    document.getElementById('okCount').textContent = ok;
+}
+
+// Función para abrir modal de edición de stock
+function openEditStockModal(company, index) {
+    const product = STOCK_DATABASE[company][index];
+    document.getElementById('editProductName').value = `${company} - ${product.name}`;
+    document.getElementById('editStockActual').value = product.actual;
+    document.getElementById('editStockMinimo').value = product.minimo;
+    
+    // Guardar referencia para guardar después
+    window.currentEditingStock = { company, index };
+    
+    const modal = document.getElementById('editStockModal');
+    modal.classList.add('active');
+}
+
+// Función para cerrar modal de edición
+function closeEditStockModal() {
+    const modal = document.getElementById('editStockModal');
+    modal.classList.remove('active');
+    window.currentEditingStock = null;
+}
+
+// Función para guardar cambios de stock
+function saveStockChanges() {
+    if (!window.currentEditingStock) return;
+    
+    const { company, index } = window.currentEditingStock;
+    const newActual = parseInt(document.getElementById('editStockActual').value);
+    const newMinimo = parseInt(document.getElementById('editStockMinimo').value);
+    
+    if (isNaN(newActual) || isNaN(newMinimo) || newActual < 0 || newMinimo < 0) {
+        alert('Por favor ingrese valores válidos');
+        return;
+    }
+    
+    STOCK_DATABASE[company][index].actual = newActual;
+    STOCK_DATABASE[company][index].minimo = newMinimo;
+    
+    // Guardar en localStorage
+    saveStockToLocalStorage();
+    
+    // Cerrar modal y actualizar tabla
+    closeEditStockModal();
+    renderStockTable();
+    updateAlertsSummary();
+    
+    showNotification('Stock actualizado correctamente');
+}
+
+// Función para aplicar filtros
+function applyFilters() {
+    const company = document.getElementById('companyFilter').value;
+    const product = document.getElementById('productSearch').value;
+    renderStockTable(company, product);
+}
+
+// Función para mostrar productos de una empresa específica
+function showProductsByCompany(companyName) {
+    const modal = document.getElementById('productsModal');
+    const modalTitle = document.getElementById('modalProductTitle');
+    const productsList = document.getElementById('productsList');
+    
+    // Obtener productos de la empresa
+    const products = COMPANIES_PRODUCTS[companyName] || [];
+    
+    // Actualizar título
+    modalTitle.textContent = `Productos ${companyName}`;
+    
+    // Limpiar lista anterior
+    productsList.innerHTML = '';
+    
+    // Agregar productos
+    if (products.length === 0) {
+        productsList.innerHTML = '<div class="empty-products">No hay productos disponibles de esta empresa</div>';
+    } else {
+        products.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.className = 'product-item';
+            productElement.innerHTML = `
+                <div class="product-item-name">${product.name}</div>
+                <div class="product-item-price">$${product.price.toFixed(2)}</div>
+                <div class="product-item-description">${product.description}</div>
+                <button class="product-item-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price})">
+                    <i class="fas fa-shopping-cart"></i> Agregar al carrito
+                </button>
+            `;
+            productsList.appendChild(productElement);
+        });
+    }
+    
+    // Mostrar modal
+    modal.classList.add('active');
+}
+
 // Función para mostrar el modal de productos
 function showProductsModal(categoryTitle) {
     const modal = document.getElementById('productsModal');
@@ -544,6 +913,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Agregar evento a las tarjetas de empresas
+    const companyCards = document.querySelectorAll('.company-card');
+    companyCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const empresa = this.getAttribute('data-empresa');
+            showProductsByCompany(empresa);
+        });
+    });
 });
 
 // Función para agregar al carrito
