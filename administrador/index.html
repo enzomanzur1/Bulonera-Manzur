@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - Gestión de Stock</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="admin-navbar">
+        <div class="admin-navbar-content">
+            <div class="admin-navbar-logo">
+                <i class="fas fa-warehouse"></i>
+                <span>Panel de Administrador - Stock</span>
+            </div>
+            <div class="admin-navbar-actions">
+                <button class="btn-icon" id="notificationBtn" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <button class="btn-icon" id="userMenuBtn" title="Usuario">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userNameDisplay">Admin</span>
+                </button>
+                <button class="btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor principal -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <ul class="admin-menu">
+                <li class="menu-item active" data-view="dashboard">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="products">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-boxes"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="stock">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Gestión de Stock</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="excel">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-table"></i>
+                        <span>Listado Excel</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="reports">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-file-chart-line"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
+                <li class="menu-item" data-view="settings">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="admin-main">
+            <!-- Dashboard -->
+            <section class="view-section active" id="dashboardView">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                    <p class="section-subtitle">Resumen general del inventario</p>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="card stats-card">
+                        <div class="card-icon" style="background: #3498db;">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Total Productos</h3>
+                            <p class="stat-number" id="totalProducts">0</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon" style="background: #2ecc71;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Stock Disponible</h3>
+                            <p class="stat-number" id="totalStock">0</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon" style="background: #e74c3c;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Bajo Stock</h3>
+                            <p class="stat-number" id="lowStockCount">0</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon" style="background: #f39c12;">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Movimientos Hoy</h3>
+                            <p class="stat-number" id="todayMovements">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Productos con Bajo Stock</h2>
+                        </div>
+                        <div class="card-body">
+                            <table class="simple-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Stock</th>
+                                        <th>Mínimo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lowStockTable">
+                                    <tr>
+                                        <td colspan="3" class="empty-state">No hay productos con bajo stock</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Últimos Movimientos</h2>
+                        </div>
+                        <div class="card-body">
+                            <table class="simple-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Tipo</th>
+                                        <th>Cantidad</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="movementsTable">
+                                    <tr>
+                                        <td colspan="4" class="empty-state">Sin movimientos registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gestión de Stock -->
+            <section class="view-section" id="stockView">
+                <div class="section-header">
+                    <h1>Gestión de Stock</h1>
+                    <p class="section-subtitle">Administra el inventario de productos</p>
+                </div>
+
+                <div class="stock-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar producto..." class="search-input">
+                    </div>
+                    <div class="toolbar-actions">
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">Todas las categorías</option>
+                            <option value="tornillos">Tornillos</option>
+                            <option value="herramientas">Herramientas</option>
+                            <option value="tuercas">Tuercas</option>
+                            <option value="pintura">Pintura</option>
+                        </select>
+                        <select id="stockFilter" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="low">Bajo stock</option>
+                            <option value="out">Agotado</option>
+                            <option value="normal">Normal</option>
+                        </select>
+                        <button class="btn-primary" id="addProductBtn">
+                            <i class="fas fa-plus"></i> Nuevo Producto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="stock-table" id="stockTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Estado</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody">
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No hay productos registrados</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Productos -->
+            <section class="view-section" id="productsView">
+                <div class="section-header">
+                    <h1>Productos</h1>
+                    <p class="section-subtitle">Listado completo de productos</p>
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No hay productos registrados</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Listado Excel -->
+            <section class="view-section" id="excelView">
+                <div class="section-header">
+                    <h1>Listado de Productos</h1>
+                    <p class="section-subtitle">Vista tipo Excel con todos los productos</p>
+                </div>
+
+                <div class="excel-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="excelSearchInput" placeholder="Buscar en listado..." class="search-input">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn-primary" id="exportExcelBtn">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                        <button class="btn-secondary" id="exportCSVBtn">
+                            <i class="fas fa-download"></i> Descargar CSV
+                        </button>
+                        <button class="btn-secondary" id="printBtn">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <div class="excel-container">
+                    <table class="excel-table" id="excelTable">
+                        <thead>
+                            <tr class="header-row">
+                                <th class="cell-id">ID</th>
+                                <th class="cell-code">Código</th>
+                                <th class="cell-name">Nombre Producto</th>
+                                <th class="cell-category">Categoría</th>
+                                <th class="cell-stock">Stock Actual</th>
+                                <th class="cell-min">Stock Mínimo</th>
+                                <th class="cell-price">Precio Unit.</th>
+                                <th class="cell-total">Valor Total</th>
+                                <th class="cell-status">Estado</th>
+                                <th class="cell-description">Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excelTableBody">
+                            <tr>
+                                <td colspan="10" class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No hay productos registrados</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="excel-footer">
+                    <div class="footer-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Productos:</span>
+                            <span class="stat-value" id="excelTotalProducts">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Stock Total:</span>
+                            <span class="stat-value" id="excelTotalStock">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Valor Total Inventario:</span>
+                            <span class="stat-value" id="excelTotalValue">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reportes -->
+            <section class="view-section" id="reportsView">
+                <div class="section-header">
+                    <h1>Reportes</h1>
+                    <p class="section-subtitle">Análisis y reportes del inventario</p>
+                </div>
+
+                <div class="reports-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Movimientos por Rango de Fechas</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="date-range">
+                                <input type="date" id="dateFrom" class="date-input">
+                                <span>hasta</span>
+                                <input type="date" id="dateTo" class="date-input">
+                                <button class="btn-secondary" id="generateReportBtn">
+                                    <i class="fas fa-file-pdf"></i> Generar Reporte
+                                </button>
+                            </div>
+                            <table class="simple-table" style="margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Tipo</th>
+                                        <th>Cantidad</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTableBody">
+                                    <tr>
+                                        <td colspan="4" class="empty-state">Sin movimientos</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuración -->
+            <section class="view-section" id="settingsView">
+                <div class="section-header">
+                    <h1>Configuración</h1>
+                    <p class="section-subtitle">Ajustes generales del sistema</p>
+                </div>
+
+                <div class="settings-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Parámetros de Stock</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="minStockDefault">Stock Mínimo por Defecto</label>
+                                <input type="number" id="minStockDefault" class="form-input" value="10" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="criticalStock">Stock Crítico</label>
+                                <input type="number" id="criticalStock" class="form-input" value="5" min="1">
+                            </div>
+                            <button class="btn-primary" id="saveSettingsBtn">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para agregar/editar producto -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productModalTitle">Nuevo Producto</h2>
+                <button class="btn-close" id="closeProductModal">&times;</button>
+            </div>
+            <form id="productForm" class="product-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">Nombre del Producto *</label>
+                        <input type="text" id="productName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Categoría *</label>
+                        <select id="productCategory" class="form-input" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="tornillos">Tornillos</option>
+                            <option value="herramientas">Herramientas</option>
+                            <option value="tuercas">Tuercas</option>
+                            <option value="pintura">Pintura</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productStock">Stock Actual *</label>
+                        <input type="number" id="productStock" class="form-input" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="productMinStock">Stock Mínimo *</label>
+                        <input type="number" id="productMinStock" class="form-input" required min="1">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productPrice">Precio Unitario *</label>
+                        <input type="number" id="productPrice" class="form-input" required min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCode">Código de Producto</label>
+                        <input type="text" id="productCode" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription" class="form-input" rows="3"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelProductBtn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para ajustar stock -->
+    <div class="modal" id="adjustStockModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ajustar Stock</h2>
+                <button class="btn-close" id="closeAdjustModal">&times;</button>
+            </div>
+            <form id="adjustStockForm" class="product-form">
+                <div class="form-group">
+                    <label for="adjustProductName">Producto</label>
+                    <input type="text" id="adjustProductName" class="form-input" readonly>
+                    <input type="hidden" id="adjustProductId">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentStock">Stock Actual</label>
+                        <input type="number" id="currentStock" class="form-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustType">Tipo de Movimiento *</label>
+                        <select id="adjustType" class="form-input" required>
+                            <option value="">Seleccionar</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                            <option value="ajuste">Ajuste</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="adjustQuantity">Cantidad *</label>
+                    <input type="number" id="adjustQuantity" class="form-input" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="adjustReason">Motivo del Movimiento</label>
+                    <input type="text" id="adjustReason" class="form-input" placeholder="Ej: Restock, Venta, Pérdida">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelAdjustBtn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Aplicar Cambio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
