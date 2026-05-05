@@ -327,7 +327,18 @@
                 </div>
 
                 <div class="reports-container">
-                    <div class="card">
+                    <!-- Tabs para seleccionar tipo de reporte -->
+                    <div class="reports-tabs">
+                        <button class="report-tab active" id="movementsReportTab" onclick="switchReportTab('movements')">
+                            <i class="fas fa-history"></i> Movimientos por Fechas
+                        </button>
+                        <button class="report-tab" id="lowStockReportTab" onclick="switchReportTab('lowstock')">
+                            <i class="fas fa-exclamation-triangle"></i> Productos Bajo Stock
+                        </button>
+                    </div>
+
+                    <!-- Reporte 1: Movimientos por Rango de Fechas -->
+                    <div class="card report-content" id="movementsReportContent">
                         <div class="card-header">
                             <h2>Movimientos por Rango de Fechas</h2>
                         </div>
@@ -355,6 +366,57 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Reporte 2: Productos con Bajo Stock -->
+                    <div class="card report-content" id="lowstockReportContent" style="display: none;">
+                        <div class="card-header">
+                            <h2>Productos con Bajo Stock por Categoría</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="report-filters">
+                                <select id="categoryFilterReport" class="filter-select">
+                                    <option value="">Todas las categorías</option>
+                                    <option value="tornillos">Tornillos</option>
+                                    <option value="herramientas">Herramientas</option>
+                                    <option value="tuercas">Tuercas</option>
+                                    <option value="pintura">Pintura</option>
+                                </select>
+                                <button class="btn-secondary" id="generateLowStockReportBtn">
+                                    <i class="fas fa-file-pdf"></i> Generar Reporte de Bajo Stock
+                                </button>
+                                <button class="btn-secondary" id="exportLowStockBtn">
+                                    <i class="fas fa-file-excel"></i> Descargar Excel
+                                </button>
+                            </div>
+                            <table class="simple-table" style="margin-top: 20px;">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categoría</th>
+                                        <th>Stock Actual</th>
+                                        <th>Stock Mínimo</th>
+                                        <th>Diferencia</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lowstockTableBody">
+                                    <tr>
+                                        <td colspan="6" class="empty-state">Sin productos con bajo stock</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="report-summary">
+                                <div class="summary-item">
+                                    <span class="label">Total productos bajo stock:</span>
+                                    <span class="value" id="lowstockCount">0</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="label">Productos agotados:</span>
+                                    <span class="value" id="outofstockCount">0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

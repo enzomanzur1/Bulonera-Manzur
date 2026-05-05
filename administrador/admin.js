@@ -351,13 +351,15 @@ function renderProductsGrid() {
         const stockPercentage = Math.min((product.stock / (product.minStock * 2)) * 100, 100);
         const stockStatus = product.stock === 0 ? 'critical' : 
                           product.stock <= product.minStock ? 'low' : 'normal';
+        const statusText = stockStatus === 'critical' ? 'Agotado' : 
+                          stockStatus === 'low' ? 'Bajo Stock' : 'Normal';
         
         return `
             <div class="product-card">
                 <div class="product-header">
                     <h3>${product.name}</h3>
                     <span class="status-badge status-${stockStatus}">
-                        ${product.stock} unidades
+                        ${statusText}
                     </span>
                 </div>
                 <div class="product-body">
@@ -385,9 +387,6 @@ function renderProductsGrid() {
                 <div class="product-footer">
                     <button class="btn-primary" onclick="editProduct(${product.id})">
                         <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn-secondary" onclick="openAdjustStockModal(${product.id})">
-                        <i class="fas fa-plus-minus"></i> Stock
                     </button>
                 </div>
             </div>
@@ -437,6 +436,24 @@ function initializeEventListeners() {
     const generateReportBtn = document.getElementById('generateReportBtn');
     if (generateReportBtn) {
         generateReportBtn.addEventListener('click', generateReport);
+    }
+    
+    // Generar reporte de bajo stock
+    const generateLowStockReportBtn = document.getElementById('generateLowStockReportBtn');
+    if (generateLowStockReportBtn) {
+        generateLowStockReportBtn.addEventListener('click', generateLowStockReport);
+    }
+    
+    // Filtro de categoría para reporte de bajo stock
+    const categoryFilterReport = document.getElementById('categoryFilterReport');
+    if (categoryFilterReport) {
+        categoryFilterReport.addEventListener('change', generateLowStockReport);
+    }
+    
+    // Exportar bajo stock a Excel
+    const exportLowStockBtn = document.getElementById('exportLowStockBtn');
+    if (exportLowStockBtn) {
+        exportLowStockBtn.addEventListener('click', exportLowStockToExcel);
     }
 }
 
@@ -585,6 +602,27 @@ function saveSettings() {
 
 // ==================== REPORTES ====================
 
+function switchReportTab(tab) {
+    // Cambiar tabs activos
+    const movementsTab = document.getElementById('movementsReportTab');
+    const lowstockTab = document.getElementById('lowStockReportTab');
+    const movementsContent = document.getElementById('movementsReportContent');
+    const lowstockContent = document.getElementById('lowstockReportContent');
+    
+    if (tab === 'movements') {
+        movementsTab.classList.add('active');
+        lowstockTab.classList.remove('active');
+        movementsContent.style.display = 'block';
+        lowstockContent.style.display = 'none';
+    } else if (tab === 'lowstock') {
+        movementsTab.classList.remove('active');
+        lowstockTab.classList.add('active');
+        movementsContent.style.display = 'none';
+        lowstockContent.style.display = 'block';
+        generateLowStockReport(); // Generar automáticamente
+    }
+}
+
 function generateReport() {
     const dateFrom = document.getElementById('dateFrom').value;
     const dateTo = document.getElementById('dateTo').value;
@@ -619,6 +657,94 @@ function generateReport() {
     
     // Opción para descargar como PDF (simulado)
     showToast(`Reporte generado: ${filteredMovements.length} movimientos encontrados`, 'success');
+}
+
+function generateLowStockReport() {
+    const categoryFilter = document.getElementById('categoryFilterReport').value;
+    
+    // Filtrar productos con bajo stock
+    let lowStockProducts = products.filter(p => {
+        const isBelowMinimum = p.stock <= p.minStock;
+        const matchesCategory = !categoryFilter || p.category === categoryFilter;
+        return isBelowMinimum && matchesCategory;
+    });
+    
+    // Ordenar por stock (los más críticos primero)
+    lowStockProducts.sort((a, b) => a.stock - b.stock);
+    
+    const lowstockTableBody = document.getElementById('lowstockTableBody');
+    
+    if (lowStockProducts.length === 0) {
+        lowstockTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay productos con bajo stock en esta categoría</td></tr>';
+        document.getElementById('lowstockCount').textContent = '0';
+        document.getElementById('outofstockCount').textContent = '0';
+        return;
+    }
+    
+    lowstockTableBody.innerHTML = lowStockProducts.map(product => {
+        const difference = product.minStock - product.stock;
+        const statusClass = product.stock === 0 ? 'critical' : 'low';
+        const statusText = product.stock === 0 ? 'Agotado' : 'Bajo Stock';
+        
+        return `
+            <tr>
+                <td><strong>${product.name}</strong></td>
+                <td>${capitalize(product.category)}</td>
+                <td>${product.stock}</td>
+                <td>${product.minStock}</td>
+                <td><span class="status-badge status-${statusClass}">-${difference}</span></td>
+                <td><span class="status-badge status-${statusClass}">${statusText}</span></td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Actualizar resumen
+    const outOfStock = lowStockProducts.filter(p => p.stock === 0).length;
+    document.getElementById('lowstockCount').textContent = lowStockProducts.length;
+    document.getElementById('outofstockCount').textContent = outOfStock;
+    
+    showToast(`Reporte generado: ${lowStockProducts.length} productos con bajo stock`, 'success');
+}
+
+function exportLowStockToExcel() {
+    const categoryFilter = document.getElementById('categoryFilterReport').value;
+    
+    // Filtrar productos con bajo stock
+    let lowStockProducts = products.filter(p => {
+        const isBelowMinimum = p.stock <= p.minStock;
+        const matchesCategory = !categoryFilter || p.category === categoryFilter;
+        return isBelowMinimum && matchesCategory;
+    });
+    
+    lowStockProducts.sort((a, b) => a.stock - b.stock);
+    
+    if (lowStockProducts.length === 0) {
+        showToast('No hay productos para exportar', 'warning');
+        return;
+    }
+    
+    // Crear datos para Excel
+    const data = lowStockProducts.map(p => ({
+        'Producto': p.name,
+        'Código': p.code,
+        'Categoría': capitalize(p.category),
+        'Stock Actual': p.stock,
+        'Stock Mínimo': p.minStock,
+        'Faltante': p.minStock - p.stock,
+        'Precio': `$${p.price.toFixed(2)}`,
+        'Estado': p.stock === 0 ? 'Agotado' : 'Bajo Stock'
+    }));
+    
+    // Crear libro de Excel
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Bajo Stock');
+    
+    // Descargar
+    const fileName = `Reporte_Bajo_Stock_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    showToast('Reporte exportado correctamente', 'success');
 }
 
 // ==================== MODALES ====================
@@ -760,31 +886,173 @@ style.textContent = `
         transform: translateY(-2px);
     }
     
+    .product-card-list {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .product-card-list:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .product-info {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 2rem;
+    }
+    
+    .product-main {
+        flex: 1;
+    }
+    
+    .product-main h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.3rem;
+        color: #2c3e50;
+    }
+    
+    .product-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .detail {
+        font-size: 0.95rem;
+        color: #555;
+    }
+    
+    .detail strong {
+        color: #2c3e50;
+    }
+    
+    .product-status {
+        display: flex;
+        align-items: center;
+    }
+    
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .product-actions button {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .product-card {
+        background: white;
+        border-radius: 8px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
     .product-header {
         display: flex;
         justify-content: space-between;
         align-items: start;
-        margin-bottom: 1rem;
-        gap: 1rem;
+        margin-bottom: 1.5rem;
+        gap: 1.5rem;
     }
     
     .product-header h3 {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1.4rem;
+        font-weight: 600;
     }
     
     .product-body {
         flex: 1;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
     
     .product-code, .product-category, .product-description {
-        margin: 0.5rem 0;
-        font-size: 0.9rem;
+        margin: 0.8rem 0;
+        font-size: 1rem;
     }
     
     .product-code {
         color: #7f8c8d;
+    }
+    
+    .stock-bar {
+        width: 100%;
+        height: 12px;
+        background: #ecf0f1;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 1.5rem 0;
+    }
+    
+    .stock-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #2ecc71, #f39c12);
+        transition: width 0.3s ease;
+    }
+    
+    .product-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 2px solid #ecf0f1;
+    }
+    
+    .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stat .label {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+    
+    .stat .value {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .product-footer {
+        display: flex;
+        gap: 0.8rem;
+    }
+    
+    .product-footer button {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    #productsGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 2rem;
     }
     
     .stock-bar {
@@ -811,47 +1079,36 @@ style.textContent = `
         border-top: 1px solid #ecf0f1;
     }
     
-    .stat {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .stat .label {
-        font-size: 0.85rem;
-        color: #7f8c8d;
-        text-transform: uppercase;
-    }
-    
-    .stat .value {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-    
-    .product-footer {
-        display: flex;
-        gap: 0.5rem;
-    }
-    
-    .product-footer button {
-        flex: 1;
-    }
-    
     .secondary {
         color: #7f8c8d;
     }
     
     @media (max-width: 768px) {
         .product-card {
-            padding: 1rem;
+            padding: 1.5rem;
+        }
+        
+        #productsGrid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .product-header {
+            margin-bottom: 1rem;
         }
         
         .product-stats {
-            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding-top: 1rem;
         }
         
         .product-footer {
-            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .product-footer button {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
         }
     }
     
@@ -860,6 +1117,97 @@ style.textContent = `
             transform: translateX(400px);
             opacity: 0;
         }
+    }
+    
+    /* ==================== ESTILOS DE REPORTES ====================*/
+    
+    .reports-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .report-tab {
+        background: transparent;
+        border: none;
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        color: #7f8c8d;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+    }
+    
+    .report-tab:hover {
+        color: #3498db;
+    }
+    
+    .report-tab.active {
+        color: #3498db;
+        border-bottom-color: #3498db;
+    }
+    
+    .report-filters {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-filters select {
+        padding: 0.7rem 1rem;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .report-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .summary-item .label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .summary-item .value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #3498db;
+    }
+    
+    .date-range {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .date-input {
+        padding: 0.7rem 1rem;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+    
+    .date-range span {
+        color: #7f8c8d;
+        font-weight: 500;
     }
 `;
 
